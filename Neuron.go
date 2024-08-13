@@ -30,6 +30,7 @@ func (n *Neuron) CalcValue() error {
 	}
 	//Применяем активационную функцию
 	//	в данном случает это Сигмоида y=1/(1+e^(-x))
-	*n.Value = 1 / (1 + math.Exp(-inputSum))
+	v := 1 / (1 + math.Exp(-inputSum))
+	n.Value = &v
 	return nil
 }

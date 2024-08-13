@@ -1,6 +1,9 @@
 package main
 
-import "math/rand"
+import (
+	"errors"
+	"math/rand"
+)
 
 type Layer []*Neuron
 
@@ -36,10 +39,36 @@ func NewNeuralNetwork() *NeuralNetwork {
 					ToNeuron:   toNeuron,
 				}
 				fromNeuron.Out = append(fromNeuron.Out, newConn)
-				toNeuron.In = append(fromNeuron.Out, newConn)
+				toNeuron.In = append(toNeuron.In, newConn)
 			}
 		}
 	}
 
 	return &result
+}
+
+func (n *NeuralNetwork) Calculate(inputs []float64) ([]float64, error) {
+	//Проверяем количество вводных данных
+	if len(inputs) != len(n.Layers[0]) {
+		return nil, errors.New("количество вводных значений не равно количеству нейронов входного уровня")
+	}
+	//Вводим значения для входного слоя
+	for i, inputNeuron := range n.Layers[0] {
+		inputNeuron.Value = &inputs[i]
+	}
+	//Считаем знаяения для всех последующих слоев
+	for _, layer := range n.Layers {
+		for _, neuron := range layer {
+			err := neuron.CalcValue()
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	//Возвращаем значения нейронов выходного слоя
+	var result []float64
+	for _, neuron := range n.Layers[len(n.Layers)-1] {
+		result = append(result, *neuron.Value)
+	}
+	return result, nil
 }
